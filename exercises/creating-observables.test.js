@@ -1,4 +1,4 @@
-import { from, of } from 'rxjs';
+import { from, Observable, of } from 'rxjs';
 
 describe('Exercise: Creating Observables', () => {
   describe(of, () => {
@@ -7,14 +7,32 @@ describe('Exercise: Creating Observables', () => {
      * the values into the `results` array, and get the expectation below to
      * pass.
      */
-    it.skip('should create an observable out of a single value', () => {
+    it('should create an observable out of a single value', () => {
       const result = [];
+
+      const $pipe1 = of(1);
+
+      $pipe1.subscribe((val) => result.push(val));
 
       expect(result).toEqual([1]);
     });
 
-    it.skip('should take a series of objects as arguments and create an observable', () => {
+    it('should take a series of objects as arguments and create an observable', () => {
       const result = [];
+
+      // const $actionObserbvable = from([
+
+      // ])
+      const $observableFn = of(
+        { type: 'INCREMENT', payload: 1 },
+        { type: 'RESET' },
+        { type: 'INCREMENT', payload: 2 },
+        { type: 'DECREMENT', payload: 1 },
+      );
+
+      console.log('this is obsefvable', $observableFn);
+
+      $observableFn.subscribe((element) => result.push(element));
 
       expect(result).toEqual([
         { type: 'INCREMENT', payload: 1 },
@@ -26,8 +44,17 @@ describe('Exercise: Creating Observables', () => {
   });
 
   describe(from, () => {
-    it.skip('should take an array of objects as arguments and create an observable', () => {
+    it('should take an array of objects as arguments and create an observable', () => {
       const result = [];
+
+      const $observFn = from([
+        { type: 'INCREMENT', payload: 1 },
+        { type: 'RESET' },
+        { type: 'INCREMENT', payload: 2 },
+        { type: 'DECREMENT', payload: 1 },
+      ]);
+
+      $observFn.subscribe((val) => result.push(val));
 
       expect(result).toEqual([
         { type: 'INCREMENT', payload: 1 },
@@ -63,12 +90,19 @@ describe('Exercise: Creating Observables', () => {
      * Your mission: collect the values as their emitted, but then
      * only assert your expectation once the observable has completed.
      */
-    it.skip('should create an observable from a promise', (done) => {
+    it('should create an observable from a promise', (done) => {
       const promise = Promise.resolve(1);
       const result = [];
 
-      expect(result).toEqual([1]);
-      done();
+      const $obs = from(promise);
+
+      $obs.subscribe({
+        next: (val) => result.push(val),
+        complete: () => {
+          expect(result).toEqual([1]);
+          done();
+        },
+      });
     });
 
     /**
@@ -76,11 +110,32 @@ describe('Exercise: Creating Observables', () => {
      * opportunity to see how to respond to an error—in this case, a rejected
      * promise—in our observables.
      */
-    it.skip('should create an observable from a promise that rejects', (done) => {
+    it('should create an observable from a promise that rejects', (done) => {
       const promise = Promise.reject({ error: 'Something terrible happened' });
 
-      expect(error).toEqual({ error: 'Something terrible happened' });
-      done();
+      const $testReject = from(promise);
+      $testReject.subscribe({
+        next: (val) => console.log('do something with the value'),
+        error: (e) => {
+          expect(e).toEqual({ error: 'Something terrible happened' });
+          done();
+        },
+      });
     });
   });
+  describe("new test with creating my Observable", ()=>{
+    const result = []
+
+    const $observable = new Observable((subscriber)=>{
+      subscriber.next("Maciek"),
+      subscriber.next("Tomek"),
+      subscriber.next("John"),
+      subscriber.next("Wacek"),
+      subscriber.complete()
+    })
+
+    $observable.subscribe((value)=> result.push(value))
+
+    expect(result).toEqual(["Maciek", "Tomek", "John", "Wacek"])
+  })
 });
